@@ -16,12 +16,20 @@ public class VoteTopicController: ControllerBase
     }
 
     [HttpGet]
-    public async Task<IEnumerable<VoteTopic>> GetVoteTopics(int? lastTopicId, int amount = 10)
+    public async Task<IEnumerable<VoteTopic>> GetVoteTopics(int? lastTopicId, int amount = 10, bool reverse = false)
     {
         IQueryable<VoteTopic> topics = ef.VoteTopics.AsQueryable<VoteTopic>();
         if (lastTopicId != null)
-            topics = topics.Where((t) => t.Id > lastTopicId);
+        {
+            if (reverse)
+                topics = topics.Where((t) => t.Id < lastTopicId).OrderByDescending(t => t.Id);
+            else
+                topics = topics.Where((t) => t.Id > lastTopicId);
+        }
+
         topics = topics.Take(amount);
+        if (reverse)
+            topics = topics.OrderBy(x => x.Id);
         return await topics.ToListAsync();
     }
 
